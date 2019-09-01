@@ -1,11 +1,9 @@
 import { Viewport } from "pixi-viewport";
 import * as PIXI from "pixi.js";
-import { getChunkName, World } from "./resources";
+import { getChunkName, World, CHUNK_SIZE } from "./resources";
 
 export class WorldMap extends PIXI.Container {
 	private readonly tiles = new PIXI.Container();
-	private readonly tilesBorder = new PIXI.Graphics();
-	private readonly chunkSize = new PIXI.Point();
 	private readonly pointer = new PIXI.Point();
 	private readonly origin = new PIXI.Point();
 
@@ -55,6 +53,7 @@ export class WorldMap extends PIXI.Container {
 		loader: PIXI.Loader,
 		resources: Partial<Record<string, PIXI.LoaderResource>>
 	) {
+		// Trouver les limites du monde
 		const xmin = this.world.chunks
 			.map(c => c.x)
 			.reduce((x1, x2) => Math.min(x1, x2));
@@ -77,49 +76,29 @@ export class WorldMap extends PIXI.Container {
 			if (res !== undefined) {
 				res.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
-				const tex = new PIXI.Sprite(res.texture);
+				const sprite = new PIXI.Sprite(res.texture);
 
-				tex.x = (chunk.x - xmin) * tex.width;
-				tex.y = (chunk.y - ymin) * tex.height;
+				// Placement du chunk
+				sprite.x = (chunk.x - xmin) * sprite.width;
+				sprite.y = (chunk.y - ymin) * sprite.height;
 
-				this.chunkSize.x = tex.width;
-				this.chunkSize.y = tex.height;
+				this.tiles.addChild(sprite);
 
-				this.tiles.addChild(tex);
-
-				const border = new PIXI.Graphics();
-				border.lineStyle(1, 0x000000, 0.2);
-				border.drawRect(
-					tex.x + 0.5,
-					tex.y + 0.5,
-					tex.width - 1,
-					tex.height - 1
-				);
-
-				const text = new PIXI.Text(`${chunk.x} ; ${chunk.y}`);
-				text.position.set(tex.x, tex.y);
-
-				// this.tiles.addChild(border);
-				// this.tiles.addChild(text);
-
+				// Définir le point 0;0 de la carte
 				if (+chunk.x === 0 && +chunk.y === 0) {
-					this.origin.x = tex.x;
-					this.origin.y = tex.y;
+					this.origin.x = sprite.x;
+					this.origin.y = sprite.y;
 				}
 			}
 		}
 
-		this.tilesBorder.lineStyle(5, 0xff0000);
-		this.tilesBorder.drawRect(
-			xmin * this.chunkSize.x,
-			ymin * this.chunkSize.y,
-			(xmax - xmin) * this.chunkSize.x,
-			(ymax - ymin) * this.chunkSize.y
-		);
+		this.viewport.worldWidth = (xmax - xmin + 1) * CHUNK_SIZE;
+		this.viewport.worldHeight = (ymax - ymin + 1) * CHUNK_SIZE;
 
-		this.viewport.worldWidth = (xmax - xmin) * this.chunkSize.x;
-		this.viewport.worldHeight = (ymax - ymin) * this.chunkSize.y;
+		// Limites de déplacement
 		this.viewport.clamp({ direction: "all" });
+
+		// Limites de zoom
 		this.viewport.clampZoom({
 			maxHeight: this.viewport.worldHeight,
 			maxWidth: this.viewport.worldWidth,
@@ -127,14 +106,11 @@ export class WorldMap extends PIXI.Container {
 			minWidth: 32,
 		});
 
+		// Centrer la vue
 		this.viewport.snap(
 			this.viewport.worldWidth / 2,
 			this.viewport.worldHeight / 2,
 			{ time: 0, removeOnComplete: true }
 		);
-
-		// this.viewport.fitWorld(false);
-
-		// this.tiles.addChild(this.tilesBorder);
 	}
 }

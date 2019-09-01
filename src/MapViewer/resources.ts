@@ -40,3 +40,5 @@ export function logLoadedResources(
 
 	console.groupEnd();
 }
+
+export const CHUNK_SIZE = 512;
