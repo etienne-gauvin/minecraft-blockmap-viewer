@@ -20,11 +20,12 @@
 		"typescript": "3.6.2"
 	},
 	"scripts": {
-		"start": "npm run import-blockmap-images && react-scripts start",
-		"build": "npm run import-blockmap-images && react-scripts build",
-		"deploy": "sh bin/deploy.sh",
+		"start": "react-scripts start",
+		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
+		"deploy": "sh bin/deploy.sh",
+		"generate-blockmap-images": "sh bin/generate-blockmap-images.sh",
 		"import-blockmap-images": "npx node bin/import-blockmap-images.js"
 	},
 	"eslintConfig": {
