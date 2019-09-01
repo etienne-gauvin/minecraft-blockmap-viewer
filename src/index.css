@@ -1,0 +1,19 @@
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+@font-face {
+	src: url("minecraftia-regular.ttf");
+	font-family: Minecraftia;
+}
+
+html {
+	overflow: hidden;
+	font-family: Minecraftia, monospace;
+}
+
+canvas {
+	cursor: url("pointer.png") 7 7, auto !important;
+}
